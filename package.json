@@ -1,0 +1,26 @@
+{
+  "name": "api-scraping",
+  "version": "1.0.0",
+  "description": "scraping https://news.ycombinator.com/.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start":"nodemon src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JSSatorres/api-scraping.git"
+  },
+  "author": "JSS",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JSSatorres/api-scraping/issues"
+  },
+  "homepage": "https://github.com/JSSatorres/api-scraping#readme",
+  "dependencies": {
+    "puppeteer": "^14.3.0",
+    "express": "^4.17.3",
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.15"
+  }
+}
