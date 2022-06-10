@@ -1,26 +1,15 @@
+const { restart } = require("nodemon");
 const puppeteer = require("puppeteer");
 
-async function scrap(req, res, next) {
-  const { pages } = req.params;
-
-  let loop;
-  if (pages === undefined) {
-    loop = 0;
-  }
-  if (pages !== undefined) {
-    loop = parseInt(pages);
-  }
+async function scrapOnePage(req, res, next) {
 
   try {
-
-    morelink
     (async () => {
-      console.log("dentro",loop);
-      let dataTitleUrl = [];
       const browser = await puppeteer.launch({ headless: false });
       const page = await browser.newPage();
       await page.goto("https://news.ycombinator.com/");
 
+      const dataTitleUrl = [];
       const listTitleUrl = await page.$$(".athing");
 
       for (const item of listTitleUrl) {
@@ -28,7 +17,7 @@ async function scrap(req, res, next) {
         const url = await item.$(".sitestr");
         const getTitle = await page.evaluate((title) => title?.innerText,title);
         const getUrl = await page.evaluate((url) => url?.innerText, url);
-        dataTitleUrl.push({ title: getTitle, url: getUrl, num: "1" });
+        dataTitleUrl.push({ title: getTitle, url: getUrl, control: "1" });
       }
 
       const dataAuthorComents = [];
@@ -58,7 +47,6 @@ async function scrap(req, res, next) {
         };
       });
 
-      await page.click("#didomi-notice-agree-button");
       await browser.close();
 
       res.status(200).send({
@@ -70,4 +58,83 @@ async function scrap(req, res, next) {
   }
 }
 
-module.exports = { scrap };
+
+async function scrapXPages(req, res, next) {
+  const { pages } = req.params;
+
+  let loop;
+  if (pages === undefined) {
+    loop = 0;
+  } else {
+    loop = parseInt(pages);
+    console.log(loop);
+  }
+
+  try {
+    (async () => {
+      const browser = await puppeteer.launch({ headless: false });
+      const page = await browser.newPage();
+      await page.goto("https://news.ycombinator.com/");
+      let totalDataTitleUrl = [];
+      let totalDataAuthorComents = [];
+
+
+      for (let index = 0; index < loop; index++) {
+
+      const dataTitleUrl = [];
+      const listTitleUrl = await page.$$(".athing");
+
+      for (const item of listTitleUrl) {
+        const title = await item.$(".titlelink");
+        const url = await item.$(".sitestr");
+        const getTitle = await page.evaluate((title) => title?.innerText,title);
+        const getUrl = await page.evaluate((url) => url?.innerText, url);
+        dataTitleUrl.push({
+          title: getTitle,
+          url: getUrl,
+          control: "1"
+        });
+      }
+      totalDataTitleUrl = [...totalDataTitleUrl.concat(dataTitleUrl)]
+
+      const dataAuthorComents = [];
+      const listAuthorComents = await page.$$(".subtext");
+      for (const item of listAuthorComents) {
+        const author = await item.$(".hnuser");
+        // const urls = await item.$eval(" span",el=>el.textContent);
+        const getAuthor = await page.evaluate(author => author?.innerText,author);
+        // const getUrl = await page.evaluate(comments => comments?.innerText, comments);
+        dataAuthorComents.push({
+          author: getAuthor,
+          comments: "null",
+          control: "1",
+        });
+      }
+      totalDataAuthorComents =[...totalDataAuthorComents.concat( dataAuthorComents)]
+      await page.click(".morelink");
+      await page.waitForTimeout(3000);
+    }
+
+    await browser.close();
+
+    const info =  totalDataTitleUrl.map((titleUrl, index) => {
+        return {
+          title: titleUrl?.title,
+          url: titleUrl?.url,
+          author: totalDataAuthorComents[index]?.author,
+          comments: totalDataAuthorComents[index]?.comments,
+          control:index,
+        };
+      });
+
+      res.status(200).send({
+        data: info,
+      });
+    })();
+
+  } catch (error) {
+    next(error);
+  }
+}
+
+module.exports = { scrapOnePage, scrapXPages};
