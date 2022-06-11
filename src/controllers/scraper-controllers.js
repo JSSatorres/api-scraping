@@ -135,6 +135,7 @@ async function scrapXPages(req, res, next) {
           control:index,
         };
       });
+      client.set(`info${pages}`, JSON.stringify(info));
       res.status(200).send({
         data: info,
       });
