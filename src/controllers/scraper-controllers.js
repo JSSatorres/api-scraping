@@ -1,5 +1,6 @@
-const { restart } = require("nodemon");
 const puppeteer = require("puppeteer");
+const redis = require("redis");
+const util = require("util");
 
 async function scrapOnePage(req, res, next) {
 
@@ -48,7 +49,6 @@ async function scrapOnePage(req, res, next) {
       });
 
       await browser.close();
-
       res.status(200).send({
         data: info,
       });
@@ -61,13 +61,22 @@ async function scrapOnePage(req, res, next) {
 
 async function scrapXPages(req, res, next) {
   const { pages } = req.params;
+  const client = redis.createClient("redis://127.0.0.1:6379");
+
+  client.set = util.promisify(client.set);
+  await client.connect()
+  const cachedPost = await client.get( `info${pages}`);
+  
+
+  if (cachedPost ) {
+    return res.send({ data: JSON.parse(cachedPost)});
+  }
 
   let loop;
   if (pages === undefined) {
     loop = 0;
   } else {
     loop = parseInt(pages);
-    console.log(loop);
   }
 
   try {
@@ -112,7 +121,7 @@ async function scrapXPages(req, res, next) {
       }
       totalDataAuthorComents =[...totalDataAuthorComents.concat( dataAuthorComents)]
       await page.click(".morelink");
-      await page.waitForTimeout(3000);
+      await page.waitForTimeout(1000);
     }
 
     await browser.close();
@@ -126,7 +135,6 @@ async function scrapXPages(req, res, next) {
           control:index,
         };
       });
-
       res.status(200).send({
         data: info,
       });
