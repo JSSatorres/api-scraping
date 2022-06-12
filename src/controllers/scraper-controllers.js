@@ -184,7 +184,7 @@ async function scrapXPages(req, res, next) {
     })();
 
   } catch (error) {
-    next(error);
+     console.log(error);
   }
 }
 
