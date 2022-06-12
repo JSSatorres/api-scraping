@@ -1,10 +1,6 @@
 const express = require("express");
 const morgan = require("morgan");
 const responseTime = require("response-time");
-
-
-
-
 const routerScraper = require("./routes/scraper-routes");
 
 const app = express();

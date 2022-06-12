@@ -4,9 +4,10 @@
   "description": "scraping https://news.ycombinator.com/.",
   "main": "src/index.js",
   "scripts": {
-    "test": "cross-env NODE_ENV=test jest --verbose",
+    "test": "cross-env NODE_ENV=test jest --verbose --detectOpenHandles",
     "start": "cross-env NODE_ENV=production node src/index.js",
-    "dev": "cross-env NODE_ENV=development nodemon src/index.js"
+    "dev": "cross-env NODE_ENV=development nodemon src/index.js",
+    "test:watch":"npm run test -- --watch"
   },
   "repository": {
     "type": "git",
@@ -29,9 +30,10 @@
     "response-time": "^2.3.2"
   },
   "devDependencies": {
-    "jest": "^28.1.1"
+    "jest": "^28.1.1",
+    "supertest": "^6.2.3"
   },
-  "jest":{
-    "testEnviroment":"node"
+  "jest": {
+    "testEnvironment": "node"
   }
 }

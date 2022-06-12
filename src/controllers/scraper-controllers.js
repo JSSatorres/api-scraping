@@ -1,14 +1,15 @@
 const puppeteer = require("puppeteer");
 const redis = require("redis");
 // const util = require("util");
-
-async function scrapOnePage(req, res, next) {
+const client = redis.createClient("redis://127.0.0.1:6379");
+const DEFAULT_EXPIRATION = 300
+async function scrapOnePage(req, res) {
+  await client.connect()
 
   try {
     const client = redis.createClient("redis://127.0.0.1:6379");
 
-    // client.set = util.promisify(client.set);
-    await client.connect()
+    // client.set = util.promisify(client.set);    
     const cachedPost1 = await client.get( `info1`);
 
     if (cachedPost1 ) {
@@ -61,27 +62,28 @@ async function scrapOnePage(req, res, next) {
         };
       });
 
-      client.set(`info1`, JSON.stringify(info));
+      client.setEx(`info1`,DEFAULT_EXPIRATION, JSON.stringify(info));
       res.status(200).send({
         data: info,
       });
     })();
   } catch (error) {
-    next(error);
+    console.log(error);
   }
 }
 
 
-async function scrapXPages(req, res, next) {
-  const { pages } = req.params;
+async function scrapXPages(req, res) {
   const client = redis.createClient("redis://127.0.0.1:6379");
+  await client.connect()
+  const { pages } = req.params;
   let pagesNoScrap = 0
 
   // const SET_ASYNC = util.promisify(client.set).bind(client);
   // const GET_ASYNC = util.promisify(client.get).bind(client);
   // const HGETALL_ASYNC = util.promisify(client.hGetAll).bind(client);
 
-  await client.connect()
+ 
 
   const cachePage = await client.get(`info${pages}`);
   if (cachePage ) {
@@ -91,7 +93,6 @@ async function scrapXPages(req, res, next) {
   for (let index =pages-1; 1 <index; index--) {
 
     let checkPages = "info"+index
-    console.log("check pages ",checkPages);
     const cachePage = await client.get(checkPages);
     if (cachePage) {
       pagesNoScrap = index
@@ -165,18 +166,16 @@ async function scrapXPages(req, res, next) {
         };
       });
 
-
       const previousCachePage = await client.get(`info${pagesNoScrap}`);
       const format = await JSON.parse(previousCachePage)
 
       let totalInfo =[]
-      console.log("pagesNoScrap",pagesNoScrap);
       if (pagesNoScrap !== 0 ) {
         totalInfo= await format.concat(info)
       }else{
         totalInfo= info
       }
-      client.set(`info${pages}`, JSON.stringify(totalInfo));
+      client.setEx(`info${pages}`, DEFAULT_EXPIRATION, JSON.stringify(totalInfo));
       console.log("info pages",`info${pages}`);
       res.status(200).send({
         data: totalInfo,
@@ -184,8 +183,8 @@ async function scrapXPages(req, res, next) {
     })();
 
   } catch (error) {
-     console.log(error);
+    console.log(error);
   }
 }
 
-module.exports = { scrapOnePage, scrapXPages};
+module.exports = { scrapOnePage, scrapXPages,client};
