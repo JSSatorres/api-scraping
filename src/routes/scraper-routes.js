@@ -1,5 +1,8 @@
 const express = require("express");
-const {scrapOnePage, scrapXPages} = require("../controllers/scraper-controllers");
+const {
+  scrapOnePage,
+  scrapXPages,
+} = require("../controllers/scraper-controllers");
 
 const routerScraper = express.Router();
 

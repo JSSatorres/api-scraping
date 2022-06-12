@@ -3,7 +3,24 @@ const app = require("../server");
 const api = supertest(app);
 const { scrapOnePage, scrapXPages,client} = require("../controllers/scraper-controllers");
 
-// afterAll(() => client.quit());
+
+
+describe("given test service ", () => {
+  describe("when is imboced  http://localhost:4000/4", () => {
+    describe(" it resolves   ", () => {
+      test("should respond with a 200 code staturs", async () => {
+        try {
+          const response = await api.get("/4").send()
+          expect(response.status).toBe(200)
+        } catch (error) {
+          console.log(error);
+        }
+      });
+    });
+  });
+});
+
+
 
 // describe("given test service ", () => {
 //   describe("when is imboced  scrapOnePage ", () => {
@@ -47,23 +64,23 @@ const { scrapOnePage, scrapXPages,client} = require("../controllers/scraper-cont
 //   });
 // });
 
-describe("given test service ", () => {
-  describe("when is imboced http://localhost:4000/1 ", () => {
-    describe(" it resolves   ", () => {
-      test("info return in json",async () => {
-        jest.setTimeout(30000);
-        try {
-          await api
-          .get("http://localhost:4000/1")
-          .expect(500)
-          .expect("Content-Type", /application\/json/);
-        } catch (error) {
-          console.log(error);
-        }
-      });
-    });
-  });
-});
+// describe("given test service ", () => {
+//   describe("when is imboced http://localhost:4000/1 ", () => {
+//     describe(" it resolves   ", () => {
+//       test("info return in json",async () => {
+//         jest.setTimeout(30000);
+//         try {
+//           await api
+//           .get("http://localhost:4000/1")
+//           .expect(500)
+//           .expect("Content-Type", /application\/json/);
+//         } catch (error) {
+//           console.log(error);
+//         }
+//       });
+//     });
+//   });
+// });
 
 // describe("given test service ", () => {
 //   describe("when is imboced  http://localhost:4000/3 ", () => {
@@ -141,3 +158,4 @@ describe("given test service ", () => {
 //     });
 //   });
 // });
+afterAll(() => client.quit());
